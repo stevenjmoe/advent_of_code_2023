@@ -8,7 +8,7 @@ struct Max {
 }
 
 fn main() {
-    let mut day_one_result: u32 = 0;
+    let mut part_one_result: u32 = 0;
     let max = &Max {
         max_red: 12,
         max_green: 13,
@@ -16,13 +16,13 @@ fn main() {
     };
 
     for line in fs::read_to_string("input.txt").unwrap().lines() {
-        day_one_result += match part_one(line, max) {
+        part_one_result += match part_one(line, max) {
             Some(x) => x,
             None => 0,
         }
     }
 
-    println!("{day_one_result}");
+    println!("{part_one_result}");
 
     let test_string = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
 Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
@@ -51,6 +51,27 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green";
             None => 0,
         }
     );
+
+    let mut part_two_result: u32 = 0;
+
+    for line in fs::read_to_string("input.txt").unwrap().lines() {
+        part_two_result += match part_two(line) {
+            Some(x) => x,
+            None => 0,
+        };
+    }
+
+    let mut test_result: u32 = 0;
+    for line in test_string.lines() {
+        test_result += match part_two(line) {
+            Some(x) => x,
+            None => 0,
+        };
+    }
+
+    assert_eq!(2286, test_result);
+
+    println!("{part_two_result}");
 }
 
 fn part_one(input: &str, max: &Max) -> Option<u32> {
@@ -94,4 +115,47 @@ fn part_one(input: &str, max: &Max) -> Option<u32> {
     } else {
         None
     }
+}
+
+fn part_two(input: &str) -> Option<u32> {
+    let reg = Regex::new(r"\d+").unwrap();
+
+    let game = input.split_once(|c: char| c == ':').unwrap();
+    let game_sets = game.1;
+
+    let sets = game_sets.split(";");
+
+    let mut highest_red = 0;
+    let mut highest_green = 0;
+    let mut highest_blue = 0;
+
+    for set in sets {
+        let s = set.split(",");
+
+        for colour in s {
+            if colour.to_lowercase().contains("red") {
+                let n: u32 = reg.find(colour).unwrap().as_str().parse().unwrap();
+
+                if n > highest_red {
+                    highest_red = n;
+                }
+            }
+
+            if colour.to_lowercase().contains("green") {
+                let n: u32 = reg.find(colour).unwrap().as_str().parse().unwrap();
+                if n > highest_green {
+                    highest_green = n;
+                }
+            }
+
+            if colour.to_lowercase().contains("blue") {
+                let n: u32 = reg.find(colour).unwrap().as_str().parse().unwrap();
+                if n > highest_blue {
+                    highest_blue = n;
+                }
+            }
+        }
+    }
+
+    Some(highest_red * highest_green * highest_blue)
 }
